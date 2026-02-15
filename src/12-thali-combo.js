@@ -53,17 +53,33 @@
  *   // => "RAJASTHANI THALI (Veg) - Items: dal - Rs.250.00"
  */
 export function createThaliDescription(thali) {
-  // Your code here
+  if(typeof thali !== "object" || thali === null || Array.isArray(thali) || typeof thali === "object" && !(["name", "items", "price", "isVeg"].every(key => key in thali))) return "";
+  return `${thali.name.toUpperCase()} (${thali.isVeg ? "Veg" : "Non-Veg"}) - Items: ${thali.items.join(", ")} - Rs.${thali.price.toFixed(2)}`;
 }
 
 export function getThaliStats(thalis) {
-  // Your code here
+  if(!Array.isArray(thalis) || Array.isArray(thalis) && thalis.length === 0) return null;
+  const totalThalis = thalis.length;
+  const vegCount = thalis.filter(thali => thali.isVeg === true).length;
+  const nonVegCount = totalThalis - vegCount;
+  const totalPrice = thalis.reduce((acc, thali) => acc+thali.price, 0);
+  const avgPrice = (totalPrice/totalThalis).toFixed(2).toString();
+  const cheapest = Math.min(...thalis.map(thali => thali.price));
+  const costliest = Math.max(...thalis.map(thali => thali.price));
+  const names = thalis.map(thali => thali.name);
+  return {totalThalis, vegCount, nonVegCount, avgPrice, cheapest, costliest, names};
 }
 
 export function searchThaliMenu(thalis, query) {
-  // Your code here
+  if(!Array.isArray(thalis) || typeof query !== "string") return [];
+  if(thalis.length === 0 || query.trim().length === 0) return [];
+  return thalis.filter(thali => thali.name.toLowerCase().includes(query.toLowerCase()) || thali.items.some(item => item.toLowerCase().includes(query.toLowerCase())));
 }
 
 export function generateThaliReceipt(customerName, thalis) {
-  // Your code here
+  if(typeof customerName !== "string" || !Array.isArray(thalis) || Array.isArray(thalis) && thalis.length === 0) return "";
+  const lineItems = thalis.map(thali => `- ${thali.name} x Rs.${thali.price}`).join("\n");
+  const total = thalis.reduce((acc, thali) => acc + thali.price, 0);
+  const count = thalis.length;
+  return `THALI RECEIPT\n---\nCustomer: ${customerName.toUpperCase()}\n${lineItems}\n---\nTotal: Rs.${total}\nItems: ${count}`;
 }
